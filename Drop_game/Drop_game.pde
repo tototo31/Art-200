@@ -19,13 +19,13 @@ Drop[] drops;       // An array of drop objects
 int totalDrops = 0; // totalDrops
 int lanes = 8; // number of lanes -2
 int speed = 2; //Car starting speed
-int timeBetweenDrops = 400; //time between drops in ms
+int timeBetweenDrops = 700; //time between drops in ms
 // **** End Customization Options **** //
 
 int catchRad = 16;
-int catcherX = 0;
-int catcherY = 0;
+int catcherX;
 int catcherYSpeed = 50;
+int catcherY;
 boolean endGame = false;
 int run = 0;
 int newLane = 1;
@@ -36,61 +36,72 @@ void setup() {
   catcher = new Catcher(catchRad); // Create the catcher with a radius of 32
   drops = new Drop[1000];    // Create 1000 spots in the array
   timer = new Timer(timeBetweenDrops);    // Create a timer that goes off every 300 milliseconds
+  startScreen();
   timer.start();             // Starting the timer
 }
+
 
 void draw() {
   if (!endGame)
   {
-    run = 0;
-    background(255);
-    road();
-    // Set catcher location
-    catcher.setLocation(catcherX, catcherY); 
-    // Display the catcher
-    catcher.display(); 
-    int newLane = 1;
-
-    if (mousePressed)
+    if (run == 0)
     {
-      newLane =  int(map(mouseX, 0, width, 1, lanes));
-      println(newLane);
-      if (timer.isFinished()) {
-        // Deal with raindrops
-        // Initialize one drop
-        drops[totalDrops] = new Drop(newLane, lanes, speed);
-        // Increment totalDrops
-        totalDrops ++ ;
-        // If we hit the end of the array
-        if (totalDrops >= drops.length) {
-          totalDrops = 0; // Start over
-        }
-        timer.start();
-      }
-    }
+      startScreen();
+      catcherX = 0;
+      catcherY = height/16;
+      if (keyPressed)
+        run = 1; //enable the end screen
+    } else
+    {
+      background(0, 128, 0);
+      road();
+      // Set catcher location
+      catcher.setLocation(catcherX, catcherY); 
+      // Display the catcher
+      catcher.display(); 
+      int newLane = 1;
 
-    // Move and display all drops
-    for (int i = 0; i < totalDrops; i++ ) {
-      drops[i].move();
-      drops[i].display();
-      if (catcher.intersect(drops[i])) {   // CHECK FOR GAME END
-        drops[i].caught();
-        winner = "Mouse";
-        endGame = true;
-      }
-      for (int j = 0; j < 9; j++)
+      if (mousePressed)
       {
-        line(j*width/8, 0, j*width/8, height);
+        newLane =  int(map(mouseX, 0, width, 1, lanes));
+        println(newLane);
+        if (timer.isFinished()) {
+          // Deal with raindrops
+          // Initialize one drop
+          drops[totalDrops] = new Drop(newLane, lanes, speed);
+          // Increment totalDrops
+          totalDrops ++ ;
+          // If we hit the end of the array
+          if (totalDrops >= drops.length) {
+            totalDrops = 0; // Start over
+          }
+          timer.start();
+        }
+      }
+
+      // Move and display all drops
+      for (int i = 0; i < totalDrops; i++ ) {
+        drops[i].move();
+        drops[i].display();
+        if (catcher.intersect(drops[i])) {   // CHECK FOR GAME END
+          drops[i].caught();
+          winner = "Mouse";
+          endGame = true;
+        }
+        for (int j = 0; j < 9; j++)
+        {
+          line(j*width/8, 0, j*width/8, height);
+        }
       }
     }
   } else
   {
     println("END GAME");
     println(winner);
-    if (run == 0)
+    if (run == 1)
     {
       end();      
-      run++;
+      run = 0;
     }
     if (mousePressed)
       endGame = false;
@@ -106,24 +117,49 @@ void end()
     drops[i].caught();
   }
   background(0);
+  textSize(32);
+  textAlign(CENTER, CENTER);
+  fill(255);
+  text("THE WINNER IS:", width/2, height/2-32);
+  text(winner, width/2, height/2);
 }
 void road()
 {
-  for (int j = 0; j <= 2*lanes; j++) // draw the road lanes
+  fill(0);
+  rect(width/(2*lanes), 0, (2*lanes-2)*width/(2*lanes), height);
+  for (int j = 0; j < 2*lanes; j++) // draw the road lanes
   {
-    stroke(0);
+
     if (j%2 == 1)
+    {
+      stroke(255);
+      strokeWeight(1);
       line(j*width/(2*lanes), 0, j*width/(2*lanes), height); // draw solids
-    else
+    } else
     {
       if (j != 0)
         for (int i = 0; i < height; i+= 50)
         {
+          stroke(255, 255, 100);
+          strokeWeight(5);
           line(j*width/(lanes*2), i, j*width/(lanes*2), i+25); // draw dashes
         }
     }
   }
+  strokeWeight(1);
+  stroke(0);
 }
+
+void startScreen()
+{
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  background(255);
+  fill(0);
+  text("WHY DID THE CHICKEN", width/2, height/2-32);
+  text("CROSS THE ROAD?", width/2, height/2);
+}
+
 void keyPressed()
 {
   if (key == 'w')

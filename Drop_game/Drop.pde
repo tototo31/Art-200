@@ -15,7 +15,7 @@ class Drop {
     println(x/width*maxLanes);
     y = -r*4;                // Start a little above the window
     speed = tempSpeed;    // set speed
-    c = color(50, 100, 150); // Color
+    c = color(random(255), random(255), random(255)); // Color
   }
 
   // Move the raindrop down

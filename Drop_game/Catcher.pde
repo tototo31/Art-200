@@ -7,7 +7,7 @@ class Catcher {
 
   Catcher(float tempR) {
     r = tempR;
-    col = color(50, 10, 10, 150);
+    col = color(255);
     x = 0;
     y = 0;
   }
@@ -18,9 +18,13 @@ class Catcher {
   }
 
   void display() {
-    stroke(0);
+    stroke(255);
     fill(col);
-    ellipse(x, y, r*2, r*2);
+    
+    line(x-r/2, y, x-r/2, y+2*r); //leg
+    line(x+r/2, y, x+r/2, y+2*r); // leg
+    ellipse(x, y, r*2, r*2); // detecable part - body
+    ellipse(x, y-r, r, r); //head
   }
 
   // A function that returns true or false based on

@@ -7,6 +7,7 @@ TODO:
  increase speed of cars as time goes on
  fix car drop locations
  
+ PASS direct x coord to drop class creation from reference array created when drawing road centers
  
  
  */
@@ -16,26 +17,33 @@ Timer timer;        // One timer object
 Drop[] drops;       // An array of drop objects
 
 // **** Customization Options **** //
-int totalDrops = 0; // totalDrops
-int lanes = 8; // number of lanes -2
-int speed = 2; //Car starting speed
-int timeBetweenDrops = 700; //time between drops in ms
+int lanes = 16; // number of lanes -2 for lawns
+int speed = 5; //Car starting speed
+int timeBetweenDrops = 500; //time between drops in ms
 // **** End Customization Options **** //
 
+float[] roadCenters;
+int totalDrops = 0; // totalDrops
 int catchRad = 16;
 int catcherX;
-int catcherYSpeed = 50;
+int catcherXSpeed = 50;
 int catcherY;
 boolean endGame = false;
 int run = 0;
 int newLane = 1;
 String winner = "";
+boolean w,a,s,d;
 
 void setup() {
-  size(600, 800);
+  size(800, 600);
+  w = false;
+  a = false;
+  s = false;
+  d = false;
   catcher = new Catcher(catchRad); // Create the catcher with a radius of 32
   drops = new Drop[1000];    // Create 1000 spots in the array
   timer = new Timer(timeBetweenDrops);    // Create a timer that goes off every 300 milliseconds
+  roadCenters = new float[lanes]; // create lane senter reference
   startScreen();
   timer.start();             // Starting the timer
 }
@@ -47,8 +55,8 @@ void draw() {
     if (run == 0)
     {
       startScreen();
-      catcherX = 0;
-      catcherY = height/16;
+      catcherX = height/16;
+      catcherY = 0;
       if (keyPressed)
         run = 1; //enable the end screen
     } else
@@ -63,12 +71,12 @@ void draw() {
 
       if (mousePressed)
       {
-        newLane =  int(map(mouseX, 0, width, 1, lanes));
+        newLane =  constrain(int(map(mouseY, 0, height, 1, lanes)), 1, lanes-1);
         println(newLane);
         if (timer.isFinished()) {
           // Deal with raindrops
           // Initialize one drop
-          drops[totalDrops] = new Drop(newLane, lanes, speed);
+          drops[totalDrops] = new Drop(newLane, roadCenters, speed);
           // Increment totalDrops
           totalDrops ++ ;
           // If we hit the end of the array
@@ -126,24 +134,28 @@ void end()
 void road()
 {
   fill(0);
-  rect(width/(2*lanes), 0, (2*lanes-2)*width/(2*lanes), height);
+  rect(0, height/(2*lanes), width, (2*lanes-2)*height/(2*lanes));
   for (int j = 0; j < 2*lanes; j++) // draw the road lanes
   {
 
-    if (j%2 == 1)
+    if (j%2 == 1) // drw partitions
     {
       stroke(255);
       strokeWeight(1);
-      line(j*width/(2*lanes), 0, j*width/(2*lanes), height); // draw solids
-    } else
+      line(0, j*height/(2*lanes), width, j*height/(2*lanes)); // draw solids
+    } else // draw dashes
     {
       if (j != 0)
-        for (int i = 0; i < height; i+= 50)
+      {
+
+        for (int i = 0; i < width; i+= 50)
         {
+          roadCenters[j/2] = j*height/(lanes*2);
           stroke(255, 255, 100);
           strokeWeight(5);
-          line(j*width/(lanes*2), i, j*width/(lanes*2), i+25); // draw dashes
+          line(i, j*height/(lanes*2), i+25, j*height/(lanes*2)); // draw dashes
         }
+      }
     }
   }
   strokeWeight(1);
@@ -162,31 +174,45 @@ void startScreen()
 
 void keyPressed()
 {
-  if (key == 'w')
+  if (key == 'w' && !w)
   {
-    catcherY -= catcherYSpeed;
+    w = true;
+    catcherY -= height/lanes;
     if (catcherY < 0)
       catcherY = 0;
-  } else if (key == 'a')
+  } else if (key == 'a' && !a)
   {
-    catcherX -= width/lanes;
+    a = true;
+    catcherX -= catcherXSpeed;
     if (catcherX < 0)
       catcherX = 0;
-  } else if (key == 's')
+  } else if (key == 's' && !s)
   {
-    catcherY += catcherYSpeed;
+    s = true;
+    catcherY += height/lanes;
     if (catcherY > height)
-      catcherY = height;
-  } else if (key == 'd')
-  {
-    catcherX += width/lanes;
-    if (catcherX > width)
     {
-      catcherX = width;
+      catcherY = height;
       winner = "KEYBOARD";
       endGame = true;
     }
+  } else if (key == 'd' && !d)
+  {
+    d = true;
+    catcherX += catcherXSpeed;
+    if (catcherX > width)
+      catcherX = width;
   } else if (key == 'j')
-
     endGame = true;
+}
+void keyReleased()
+{
+  if (key == 'w')
+    w = false;
+  else if (key == 'a')
+    a = false;
+  else if (key == 's')
+    s = false;
+  else if (key == 'd')
+    d = false;
 }

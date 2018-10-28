@@ -42,7 +42,7 @@ int end = 0; // timer for determining car speed
 
 void setup() {
   size(800, 600);
-  w = false;
+  w = false; // key press checks 
   a = false;
   s = false;
   d = false;
@@ -51,7 +51,7 @@ void setup() {
   timer = new Timer(timeBetweenDrops);    // Create a timer that goes off every 300 milliseconds
   roadCenters = new float[lanes+1]; // create lane center reference
   roadBounds = new float[lanes]; // create lane center reference
-  startScreen();
+  startScreen(); // diplay start screen
   timer.start();             // Starting the timer
 }
 
@@ -60,25 +60,25 @@ void draw() {
   switch(run)
   {
   case "start":
-    startScreen();
-    catcherX = height/16;
+    startScreen(); // display start screen
+    catcherX = height/16; // set a starting position for the chicken
     catcherY = 0;
-    if (keyPressed)
+    if (keyPressed) // start the game if a key is pressed
       run = "game"; //enable the end screen
     break;
-    
-  case "end":
-    println("END GAME");
-    println(winner);
 
-    end();      
-    if (mousePressed)
+  case "end":
+    println("END GAME"); // debug output
+    println(winner); // more debug
+
+    end();      // call the end function
+    if (mousePressed) // go back to start if mouse is clicked
       run = "start";
     break;
 
   default: // default is game state
-    background(0, 128, 0);
-    road();
+    background(0, 128, 0);  // make green grass
+    road();  // draw road
     // Set catcher location
     catcher.setLocation(catcherX, roadCenters[catcherY]); 
     // Display the catcher
@@ -89,13 +89,14 @@ void draw() {
       drops[i].display();
       if (catcher.intersect(drops[i])) {   // CHECK FOR GAME END
         drops[i].caught();
-        winner = "Mouse";
+        winner = "Mouse";  // if any drops are caught the game ends
         run = "end"; // set to end state
       }
-      for (int j = 0; j < 9; j++)
-      {
-        line(j*width/8, 0, j*width/8, height);
-      }
+      // dont know what this for loop was for. if things break bring it back
+      /* for (int j = 0; j < 9; j++) */
+      /* { */
+      /*   line(j*width/8, 0, j*width/8, height); */
+      /* } */
     }
     break;
   }
@@ -103,13 +104,13 @@ void draw() {
 
 void end() // run when the game ends
 {
-  println("END FUNCTION");
+  println("END FUNCTION"); // debug
 
-  for (int i = 0; i < totalDrops; i++)
+  for (int i = 0; i < totalDrops; i++) // catch all drops so they wont show up during the next game
   {
     drops[i].caught();
   }
-  background(0);
+  background(0); // clear screen and proint text
   textSize(32);
   textAlign(CENTER, CENTER);
   fill(255);
@@ -119,7 +120,7 @@ void end() // run when the game ends
 
 void startScreen() // run when the game begins
 {
-  textAlign(CENTER, CENTER);
+  textAlign(CENTER, CENTER); //print title screen
   textSize(32);
   background(255);
   fill(0);
@@ -142,7 +143,7 @@ void road() // for drawing and populating road related arrays
       line(0, j*height/(2*lanes), width, j*height/(2*lanes)); // draw solids
     } else // draw dashes
     {
-      if (j != 0)
+      if (j != 0) // dont want dashes at the very top of the screen
       {
 
         for (int i = 0; i < width; i+= 50)
@@ -164,13 +165,13 @@ void road() // for drawing and populating road related arrays
 
 int whichLane(int pos, float[] lanes, int start) // this function is to determine where to put the new car based on mouse position
 {
-  if (start >= lanes.length)
+  if (start >= lanes.length) // base case to avoid index errors
     return 0;
   else
   {
-    if (pos > lanes[start])
+    if (pos > lanes[start])  //while the test value is grater than the bottom of the specific lane continue
       return whichLane(pos, lanes, start+1); // some tasty recursion to make things interesting
-    else
+    else // if its smaller return the index for the edge of the lane
       return start;
   }
 }
@@ -180,8 +181,8 @@ void keyPressed()
   if (key == 'w' && !w)
   {
     w = true;
-    catcherY -= 1;
-    if (catcherY < 0)
+    catcherY -= 1; // this is actually the index used for the roadCenters array
+    if (catcherY < 0) // keep chicken in the screen
       catcherY = 0;
   } else if (key == 'a' && !a)
   {
@@ -211,7 +212,8 @@ void keyPressed()
 }
 void keyReleased()
 {
-  if (key == 'w')
+  // this is to prevent key repeating. Only move one lane for each key press
+  if (key == 'w') 
     w = false;
   else if (key == 'a')
     a = false;
@@ -223,7 +225,7 @@ void keyReleased()
 
 void mousePressed()
 {
-  start = millis();
+  start = millis(); // start a faux timer used to determine car speed
 }
 
 void mouseReleased()
@@ -231,9 +233,9 @@ void mouseReleased()
   end = millis();
   int totalTime = (end-start)/100; // determine # of 100 millis passed
   int carSpeed = constrain(totalTime, minSpeed, maxSpeed) ; // for every 100 ms increment speed by 1
-  newLane =  whichLane(mouseY, roadBounds, 0);
+  newLane =  whichLane(mouseY, roadBounds, 0); //determine what lane the car is in
   //println(newLane); // show car lane
-  if (newLane != 0)
+  if (newLane != 0) // no cars in the median
   {
     if (timer.isFinished()) {
       // Deal with raindrops

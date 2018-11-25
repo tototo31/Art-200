@@ -19,7 +19,7 @@ class Snowflake {
     index = 0;
     scale = 4;  // scale factor ie 1/scale
     println("initialized flake");
-    for ( int i = 0; i < len; i++)
+    for ( int i = 0; i < len; i++) // drawing thiese points are not needed and probably slow the program down
     {
       posX[i] = -1000;
       posY[i] = -1000;
@@ -28,7 +28,7 @@ class Snowflake {
     }
   }
 
-  void displayFrond()
+  void displayarm()
   {
     //println("drawing flake");
     for (int i = 0; i<len; i++)
@@ -41,16 +41,17 @@ class Snowflake {
     }
   }
 
-  void displayWhole(int fronds, int x, int y)
+  void displayWhole(int arms, float x, float y)
   {
     pushMatrix();
     translate(x, y);
 
-    //snowflake.displayFrond();
-    for (int j = 0; j <= fronds; j++)
+    //snowflake.displayarm();
+    for (int j = 0; j <= arms; j++)
     {
-      rotate(j*((2*PI)/fronds));
-      for (int i = 0; i<len; i++)
+      rotate((2*PI)/(arms));
+      //rotate(j*((PI)/(arms)));
+      for (int i = 0; i<len; i++) // draws arm
       {
         //if ( posX[i] != -1 && pPosX[i] != -1 && posY[i] != -1 && pPosY[i] != -1)
         line((posX[i]-(width/2))/scale, (posY[i]-(height/2))/scale, (pPosX[i]-(width/2))/scale, (pPosY[i]-(height/2))/scale);

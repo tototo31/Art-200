@@ -1,10 +1,12 @@
 /*
 reference for library before I lose the link - http://www.ricardmarxer.com/fisica/reference/index.html
-TODO: 
- DONE - fix arm rotations
- optimize - use lists?
- Implement increasing arms
- Calculate body size based on flake size
+ TODO: 
+ fix arm rotationsc - DONE
+ Implement increasing arms - DONE
+ Calculate body size based on flake size - DONE
+ 
+ optimize - use lists? - DONEISH
+ 
  implement back to creation
  
  */
@@ -23,6 +25,8 @@ int freq = 20; // freq at which to drop flakes - dont change by much this is ver
 
 boolean preview = false; // preview button state
 
+boolean debug = true; // enable/disable debug keys
+
 void setup()
 {
   size(800, 600);
@@ -35,12 +39,12 @@ void setup()
 
   world = new FWorld();
   world.setGravity(0, 300); // set world gravity
-  /*
-   world.setEdges();
-   world.remove(world.left);
-   world.remove(world.right);
-   world.remove(world.top);
-   */
+
+  world.setEdges();
+  world.remove(world.left);
+  world.remove(world.right);
+  world.remove(world.top);
+
   world.setGrabbable(true); // you can grab the flakes now
 }
 
@@ -57,10 +61,8 @@ void draw()
     //end make canvas
     if (!preview && mousePressed) // if your trying to draw
     {
-      if (mouseX > width/4 && mouseX < 3*(width/4) && snowflake.addPoint(mouseX, mouseY, pmouseX, pmouseY)) // make sure the mouse is on the canvas, and add the point
-        ;
-      else 
-      println("reached end of mem press x to reset");
+      if (mouseX > width/4 && mouseX < 3*(width/4) && (mouseX != pmouseX || mouseY != pmouseY)) // make sure the mouse is on the canvas, and add the point
+        snowflake.addPoint(mouseX, mouseY, pmouseX, pmouseY);
     }
 
     if (preview) // if the preview toggle is on show the scaled flake
@@ -76,23 +78,35 @@ void draw()
     image(clouds, 0, 0); // amazing looking clouds
     if (frameCount%freq == 1)  // determine when to drop flakes
     {
-      FCircle circle = new FCircle(40); // circle are probably the best to represent a snowflake - especially with many arms
-      circle.setPosition(random(width), 200); // spawn randomly in the clouds
+      FCircle flake = new FCircle(snowflake.size); // circle are probably the best to represent a snowflake - especially with many arms
+      flake.setPosition(random(width), 200); // spawn randomly in the clouds
       //circle.setVelocity(0, 200);
-      circle.setFillColor(0);
-      world.add(circle); // add it to the world
+      flake.setFillColor(0);
+      if (!debug)
+      {
+        flake.setNoStroke();
+      }
+
+      world.add(flake); // add it to the world
     }
 
     world.step(); // step the world 1/60th of a second
     ArrayList<FBody> bodies=world.getBodies(); // create a list of bodies in the world
-    for (int i = 0; i < bodies.size()-1; i++) // for each body draw a flake over it
+    for (int i = 0; i < bodies.size(); i++) // for each body draw a flake over it
     {
-      if (bodies.get(i).getY() > height || bodies.get(i).getX() > width || bodies.get(i).getX() < 0) // if a flake leaves the display delete it
-        world.remove(bodies.get(i));
-      snowflake.displayWhole(arms, bodies.get(i).getX(), bodies.get(i).getY()); // if it wasnt removed show the beautiful flake
-      //println(bodies.get(i).getX());
+      if (!bodies.get(i).isStatic()) // if a flake leaves the display delete it
+      {
+        snowflake.displayWhole(arms, bodies.get(i).getX(), bodies.get(i).getY()); // if it wasnt removed show the beautiful flake
+        if ((bodies.get(i).getY() > height || bodies.get(i).getX() > width || bodies.get(i).getX() < 0))
+          world.remove(bodies.get(i));
+      }
+      /*
+      if(!bodies.get(i).isStatic())
+       {
+       snowflake.displayWhole(arms, bodies.get(i).getX(), bodies.get(i).getY()); // if it wasnt removed show the beautiful flake
+       }
+       */
     }
-    println();
     world.draw(); // draw the world bodies in the new state
     break;
   }
@@ -141,11 +155,13 @@ void drawButtons()
 
 void keyPressed() // debug buttons
 {
-  if (key == '1')
-    state = 1;
-  else if (key == '0')
-    state = 0;
-    
+  if (debug)
+  {
+    if (key == '1')
+      state = 1;
+    else if (key == '0')
+      state = 0;
+  }
 }
 
 void mousePressed()
@@ -167,6 +183,11 @@ void mousePressed()
     {
       println("CLICKED START");
       world.clear();
+      world.setEdges();
+      world.remove(world.left);
+      world.remove(world.right);
+      world.remove(world.top);
+      snowflake.finish();
       state = 1;
     }
     if (mouseX >= 2*(width/16) && mouseY >= 6*(height/10) && mouseX <= 3*(width/16) && mouseY <= 6*(height/10)+boxSize) // "+" arm button
@@ -179,5 +200,8 @@ void mousePressed()
       if (arms > minarms)
         arms -= 1;
     }
+  } else if (state == 1) // run state
+  {
+    ;
   }
 }

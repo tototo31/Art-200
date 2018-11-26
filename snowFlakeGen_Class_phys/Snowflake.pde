@@ -50,7 +50,6 @@ class Snowflake {
     for (int j = 0; j <= arms; j++)
     {
       rotate((2*PI)/(arms));
-      //rotate(j*((PI)/(arms)));
       for (int i = 0; i<len; i++) // draws arm
       {
         //if ( posX[i] != -1 && pPosX[i] != -1 && posY[i] != -1 && pPosY[i] != -1)

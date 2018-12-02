@@ -121,11 +121,11 @@ class Snowflake {
 
     for (int i = 0; i < index; i++)
     {
-      float flakeWidth = abs(dist((posX.get(i)-(width/2)), (posY.get(i)-(height/2)), 0, 0));
+      float flakeWidth = abs(dist((posX.get(i)), (posY.get(i)), width/2, height/2));
       if (flakeWidth > greatest)
         greatest = flakeWidth;
     }
     //println(int(greatest/2));
-    return int(greatest/(scale/2)); // figure out what to divide by to get right circle size
+    return int(greatest/scale); // figure out what to divide by to get right circle size
   }
 }

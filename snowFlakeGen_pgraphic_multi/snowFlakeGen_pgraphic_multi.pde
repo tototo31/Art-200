@@ -92,7 +92,7 @@ void draw()
         flake.setNoStroke();
       } else
       {
-        frame.setTitle(str(frameRate));
+        surface.setTitle(str(frameRate));
       }
       // *** END DEBUG STUFF***
       world.add(flake); // add it to the world
@@ -102,10 +102,16 @@ void draw()
     ArrayList<FBody> bodies=world.getBodies(); // create a list of bodies in the world
     for (int i = 0; i < bodies.size(); i++) // for each body draw a flake over it
     {
-      if (!bodies.get(i).isStatic()) // if a flake leaves the display delete it
-      {
-        allFlakes.get(whichFlake).display(bodies.get(i).getX(), bodies.get(i).getY()); // if it wasnt removed show the beautiful flake
-        if ((bodies.get(i).getY() > height || bodies.get(i).getX() > width || bodies.get(i).getX() < 0))
+        if( bodies.get(i) instanceof FCircle ) {
+          float sz = ((FCircle)bodies.get(i)).getSize();
+          for(int flake = 0; flake < allFlakes.size(); flake++)
+          {
+            if(allFlakes.get(flake).size == sz)
+            {
+              allFlakes.get(flake).display(bodies.get(i).getX(), bodies.get(i).getY()); // if it wasnt removed show the beautiful flake
+            }
+          }
+        if ((bodies.get(i).getY() > height+sz || bodies.get(i).getX() > width+sz || bodies.get(i).getX() < 0-sz))
           world.remove(bodies.get(i)); // delete teh flake if its off the screen
       }
     }
